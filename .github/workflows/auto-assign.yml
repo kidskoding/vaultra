@@ -17,15 +17,23 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
             const pr = context.issue.number;
+            const author = context.payload.pull_request.user.login;
 
             await github.rest.issues.addAssignees({
-              owner, repo,
+              owner,
+              repo,
               issue_number: pr,
-              assignees: [context.payload.pull_request.user.login]
+              assignees: [author],
             });
 
-            await github.rest.pulls.requestReviewers({
-              owner, repo,
-              pull_number: pr,
-              reviewers: ['kidskoding', 'ashcastelinocs124']
-            });
+            const desiredReviewers = ['kidskoding', 'ashcastelinocs124'];
+            const reviewers = desiredReviewers.filter((r) => r !== author);
+
+            if (reviewers.length > 0) {
+              await github.rest.pulls.requestReviewers({
+                owner,
+                repo,
+                pull_number: pr,
+                reviewers,
+              });
+            }
