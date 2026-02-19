@@ -2,59 +2,35 @@
 
 > AI agent that small business owners "hire" to proactively manage creditworthiness and funding readiness.
 
-## Overview
-
 Vaultra doesn't wait for a user to ask for a loan. It continuously optimizes their financial profile so they're *instantly underwritable* when opportunity arises.
 
-See [docs/BACKGROUND_AND_VISION.md](./docs/BACKGROUND_AND_VISION.md) for the full vision and business problems this solves.
+## What is Vaultra?
+
+Vaultra is an AI financial agent that proactively monitors and optimizes your business's financial health for funding readiness. Think of it as a full-time financial operations manager focused on one job: keeping you *instantly underwritable*.
+
+### Key Features
+
+- **Proactive Optimization**: Continuously monitors your financial metrics and suggests improvements before you need funding
+- **Unified Funding Readiness Score**: Single 0–100 score that shows how attractive your business is to lenders
+- **Actionable Recommendations**: Daily, prioritized recommendations to improve your score (e.g., "Reduce chargebacks", "Stabilize revenue streams")
+- **AI Agent**: Natural language Q&A that explains your metrics, recommendations, and funding readiness factors
+- **Stripe Integration**: Connects to your Stripe account to analyze revenue, payouts, disputes, and chargebacks
+
+## How It Works
+
+1. **Connect Stripe**: Link your Stripe account (OAuth)
+2. **Automatic Analysis**: Vaultra ingests your financial data and computes metrics hourly
+3. **Score & Recommendations**: Get your funding readiness score and daily recommendations
+4. **Ask Questions**: Chat with the AI agent about your financial health and what to improve
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Frontend** | Astro |
-| **Backend** | Python / FastAPI |
-| **AI Agent** | MCP + RAG (Pinecone) |
-| **Payments** | Stripe API |
-| **Database** | PostgreSQL |
-| **Infrastructure** | Docker, Kubernetes (GKE), Google Cloud |
-
-See [docs/TECH_STACK.md](./docs/TECH_STACK.md) for full rationale.
-
-## Project Structure
-
-```
-vaultra/
-└── docs/              # Specifications (spec-driven development)
-    ├── SPEC.md       # Product scope, flows
-    ├── ARCHITECTURE.md  # Backend services, APIs, deployment
-    ├── FRONTEND_SPEC.md # Frontend pages, components, routes
-    ├── DATA_MODEL.md    # Database schemas
-    ├── TECH_STACK.md    # Technology choices
-    └── LLM_SPEC.md      # LLM provider abstraction
-```
-
-**Implementation directories** (`backend/`, `frontend/`, `infra/`) will be created following the specifications.
-
-## Documentation
-
-All specifications are in `docs/`:
-
-- **[BACKGROUND_AND_VISION.md](./docs/BACKGROUND_AND_VISION.md)** — Business problems and vision
-- **[SPEC.md](./docs/SPEC.md)** — Product scope and MVP
-- **[ARCHITECTURE.md](./docs/ARCHITECTURE.md)** — Backend service boundaries, APIs, deployment
-- **[FRONTEND_SPEC.md](./docs/FRONTEND_SPEC.md)** — Frontend pages, components, routes, API integration
-- **[DATA_MODEL.md](./docs/DATA_MODEL.md)** — Database schemas
-- **[TECH_STACK.md](./docs/TECH_STACK.md)** — Technology choices
-- **[LLM_SPEC.md](./docs/LLM_SPEC.md)** — LLM provider abstraction
-
-## Development Workflow
-
-This project follows **spec-driven development**:
-
-1. **Specs first**: All features are specified in `docs/` before implementation
-2. **Implementation**: Code follows the specifications
-3. **Documentation**: Code references spec documents
+- **Frontend**: Astro (static site generation with React islands)
+- **Backend**: Python / FastAPI (modular monolith)
+- **AI Agent**: MCP (Model Context Protocol) + RAG with Pinecone
+- **Database**: PostgreSQL (Cloud SQL)
+- **Payments**: Stripe API (Connect Standard)
+- **Infrastructure**: Docker, Kubernetes (GKE), Google Cloud
 
 ## License
 
