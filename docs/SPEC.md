@@ -57,6 +57,12 @@ See [TECH_STACK.md](./TECH_STACK.md) for full rationale and data flow.
 
 ---
 
+## License
+
+**MIT License** — This project is licensed under the MIT License. See LICENSE file in the repository root for full text.
+
+---
+
 ## Spec Documents
 
 > 📖 **Start here**: See [SPECIFICATION_INDEX.md](./SPECIFICATION_INDEX.md) for a complete guide to all specifications.
