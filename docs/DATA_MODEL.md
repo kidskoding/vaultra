@@ -1,4 +1,4 @@
-# Vaultura — Data Model Specification
+# Vaultra — Data Model Specification
 
 > PostgreSQL schemas, relationships, and migration strategy. Spec-driven; implementation follows.
 

@@ -1,4 +1,4 @@
-# Vaultura — Background & Vision
+# Vaultra — Background & Vision
 
 > The business problem, why it persists, and how an AI agent can solve it.
 
@@ -6,13 +6,13 @@
 
 ## The Agent at a Glance
 
-**Vaultura** is an AI financial agent that small business owners "hire" to manage their creditworthiness and funding readiness. It doesn't wait for a user to ask for a loan—it proactively monitors, optimizes, and advises so that when capital is needed, the business is already in the best position to qualify.
+**Vaultra** is an AI financial agent that small business owners "hire" to manage their creditworthiness and funding readiness. It doesn't wait for a user to ask for a loan—it proactively monitors, optimizes, and advises so that when capital is needed, the business is already in the best position to qualify.
 
 Think of it as a full-time financial operations manager focused on one job: keeping you *instantly underwritable*.
 
 ---
 
-## The Business Problems (Without Vaultura)
+## The Business Problems (Without Vaultra)
 
 ### 1. Reactive, Not Proactive
 
@@ -46,11 +46,11 @@ Small business owners wear many hats. They don't have a CFO or a credit analyst 
 
 ---
 
-## What Vaultura Solves
+## What Vaultra Solves
 
 ### Proactive Optimization
 
-Vaultura runs in the background. It connects to Stripe (and eventually other sources), ingests revenue and risk data, computes metrics, and surfaces issues *before* they become dealbreakers. It nudges: "Increase your cash buffer," "Your dispute rate is trending up," "You're funding-ready—here's how to stay that way."
+Vaultra runs in the background. It connects to Stripe (and eventually other sources), ingests revenue and risk data, computes metrics, and surfaces issues *before* they become dealbreakers. It nudges: "Increase your cash buffer," "Your dispute rate is trending up," "You're funding-ready—here's how to stay that way."
 
 ### Unified Funding Readiness Score
 
@@ -58,7 +58,7 @@ One number and one tier: "75 — Funding-Ready" or "42 — Needs Work." Backed b
 
 ### Explainable, Actionable Recommendations
 
-Not just "improve your profile." Vaultura recommends specific actions with context: "Reduce chargebacks—consider updating your refund policy" or "Your MRR is stable; lenders like that—keep subscription revenue above 60%." Each recommendation ties to metrics and explains the impact.
+Not just "improve your profile." Vaultra recommends specific actions with context: "Reduce chargebacks—consider updating your refund policy" or "Your MRR is stable; lenders like that—keep subscription revenue above 60%." Each recommendation ties to metrics and explains the impact.
 
 ### Natural Language Agent
 
@@ -66,13 +66,13 @@ Owners can ask: "What's hurting my funding readiness?" or "What should I do this
 
 ### Always-On, Low Friction
 
-No meetings to schedule. No retainer to pay. Connect Stripe once, and Vaultura watches. Notifications and a dashboard keep the owner informed; the agent is there when they have questions.
+No meetings to schedule. No retainer to pay. Connect Stripe once, and Vaultra watches. Notifications and a dashboard keep the owner informed; the agent is there when they have questions.
 
 ---
 
 ## How This Benefits Small Businesses
 
-| Without Vaultura | With Vaultura |
+| Without Vaultra | With Vaultra |
 |------------------|---------------|
 | Discover funding gaps at application time | Fix gaps proactively |
 | Guess at lender criteria | See exactly what matters |
@@ -98,7 +98,7 @@ A dashboard shows numbers. An agent *understands* them and *explains* them. It a
 
 ---
 
-## What Vaultura Is *Not*
+## What Vaultra Is *Not*
 
 - **Not a lender**: It doesn't originate loans. It prepares you for lenders.
 - **Not regulated financial advice**: It provides informational guidance. No investment or tax advice.
@@ -109,4 +109,4 @@ A dashboard shows numbers. An agent *understands* them and *explains* them. It a
 
 ## TL;DR
 
-Small businesses struggle to stay funding-ready because they're reactive, under-informed, and time-constrained. Vaultura is an AI agent that proactively monitors their financial profile, scores their readiness, recommends improvements, and answers questions in plain language—so when capital is needed, they're already in shape to get it.
+Small businesses struggle to stay funding-ready because they're reactive, under-informed, and time-constrained. Vaultra is an AI agent that proactively monitors their financial profile, scores their readiness, recommends improvements, and answers questions in plain language—so when capital is needed, they're already in shape to get it.

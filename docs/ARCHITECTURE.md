@@ -1,4 +1,4 @@
-# Vaultura — Architecture Specification
+# Vaultra — Architecture Specification
 
 > Service boundaries, API contracts, and deployment layout. Spec-driven; implementation follows.
 
@@ -8,12 +8,12 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                           VAULTURA APP                                   │
+│                           VAULTRA APP                                  │
 ├─────────────┬─────────────┬─────────────┬─────────────┬─────────────────┤
 │   auth      │   users     │   stripe    │  metrics    │   agent         │
 │   module    │   module    │   module    │  module     │   module        │
 ├─────────────┴─────────────┴─────────────┴─────────────┴─────────────────┤
-│                     Shared: DB, Redis, Pinecone, Stripe SDK              │
+│                     Shared: DB, Redis, Pinecone, Stripe SDK             │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -138,7 +138,7 @@ For MVP, same-process is simpler: tools are Python functions that query DB/metri
 
 ## RAG (Pinecone) Flow
 
-**Index**: `vaultura-knowledge` (or per-env: `vaultura-knowledge-dev`)
+**Index**: `vaultra-knowledge` (or per-env: `vaultra-knowledge-dev`)
 
 **Metadata** (stored with each vector):
 - `source` (e.g., "best-practices", "lending-criteria")
@@ -175,9 +175,9 @@ For MVP, same-process is simpler: tools are Python functions that query DB/metri
                            │
            ┌───────────────┼───────────────┐
            │               │               │
-    ┌──────▼──────┐ ┌──────▼──────┐ ┌─────▼─────┐
+    ┌──────▼──────┐ ┌──────▼──────┐ ┌──────▼────┐
     │  Cloud SQL  │ │    Redis    │ │  Pinecone │
-    │ (Postgres)  │ │  (jobs)    │ │  (SaaS)   │
+    │ (Postgres)  │ │  (jobs)     │ │  (SaaS)   │
     └─────────────┘ └─────────────┘ └───────────┘
 ```
 

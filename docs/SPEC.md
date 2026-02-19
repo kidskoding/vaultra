@@ -1,10 +1,10 @@
-# Vaultura — Product Specification
+# Vaultra — Product Specification
 
 > AI agent that small business owners "hire" to proactively manage creditworthiness and funding readiness.
 
 ## Vision
 
-Vaultura doesn't wait for a user to ask for a loan. It continuously optimizes their financial profile so they're *instantly underwritable* when opportunity arises.
+Vaultra doesn't wait for a user to ask for a loan. It continuously optimizes their financial profile so they're *instantly underwritable* when opportunity arises.
 
 ## Tech Stack Summary
 
@@ -64,5 +64,6 @@ See [TECH_STACK.md](./TECH_STACK.md) for full rationale and data flow.
 | [BACKGROUND_AND_VISION.md](./BACKGROUND_AND_VISION.md) | Business problems, what the agent solves, why it matters |
 | [SPEC.md](./SPEC.md) | Product scope, flows, NFRs |
 | [TECH_STACK.md](./TECH_STACK.md) | Technology choices and data flow |
+| [LLM_SPEC.md](./LLM_SPEC.md) | LLM provider abstraction (OpenAI + Ollama) |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Services, APIs, deployment |
 | [DATA_MODEL.md](./DATA_MODEL.md) | Schemas, tables, migrations |

@@ -1,4 +1,4 @@
-# Vaultura — Tech Stack Specification
+# Vaultra — Tech Stack Specification
 
 > Spec-driven development: tech choices are locked before implementation.
 
@@ -60,6 +60,27 @@
   - Lending criteria / underwriting policy docs
   - Recommendation templates and explanations
 - **Flow**: Ingest docs → embed (e.g., OpenAI, Cohere) → upsert to Pinecone → query at agent runtime for context
+
+---
+
+### LLM Provider: OpenAI (cloud) + Ollama (local/self-hosted)
+
+- **Abstraction**: Vaultra uses an internal `LLMProvider` interface so the agent logic is not tied to a single vendor.
+- **Backends**:
+  - **OpenAI (production default)** — used when `LLM_PROVIDER=openai`.
+  - **Ollama (local dev / optional self-hosted)** — used when `LLM_PROVIDER=ollama`.
+- **Configuration**:
+  - `LLM_PROVIDER`: `openai` \| `ollama`
+  - `OPENAI_API_KEY`: required when `LLM_PROVIDER=openai`
+  - `OLLAMA_BASE_URL`: e.g. `http://localhost:11434` or internal service URL on GKE
+  - `OLLAMA_MODEL`: e.g. `llama3.1:8b` (model name loaded in Ollama)
+- **Usage**:
+  - RAG retrieves context from Pinecone.
+  - Agent builds prompt (system + metrics + recommendations + retrieved chunks).
+  - Prompt is sent to the selected `LLMProvider` backend (OpenAI or Ollama).
+- **Chain/orchestration libs**:
+  - **No LangChain/LangGraph in v1** — orchestration is hand-rolled with MCP tools and simple Python code for clarity and control.
+  - We leave room to introduce LangGraph later if the agent flows become complex enough to benefit from graph-based orchestration.
 
 ---
 
