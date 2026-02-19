@@ -58,4 +58,4 @@ This project follows **spec-driven development**:
 
 ## License
 
-[To be determined]
+MIT
