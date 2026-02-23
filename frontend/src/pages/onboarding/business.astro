@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Set up your business">
+  <div class="min-h-screen flex items-center justify-center bg-claude-bg px-4">
+    <div class="w-full max-w-md bg-claude-cream rounded-2xl border border-claude-sand p-8">
+      <h1 class="text-xl font-semibold text-claude-charcoal mb-2">Set up your business</h1>
+      <p class="text-sm text-claude-gray-warm mb-6">Tell us about your business to get started.</p>
+
+      <form id="business-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-claude-charcoal mb-1.5">Business name *</label>
+          <input id="name" type="text" required class="w-full border border-claude-sand rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claude-coral/50 focus:border-claude-coral transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-claude-charcoal mb-1.5">Legal entity</label>
+          <input id="legal_entity" type="text" class="w-full border border-claude-sand rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claude-coral/50 focus:border-claude-coral transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-claude-charcoal mb-1.5">Industry</label>
+          <input id="industry" type="text" placeholder="e.g. retail, saas, food" class="w-full border border-claude-sand rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claude-coral/50 focus:border-claude-coral transition-colors" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-claude-charcoal mb-1.5">Annual revenue estimate ($)</label>
+          <input id="revenue" type="number" class="w-full border border-claude-sand rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-claude-coral/50 focus:border-claude-coral transition-colors" />
+        </div>
+        <div id="error-msg" class="text-red-600 text-sm hidden"></div>
+        <button type="submit" class="w-full bg-claude-coral text-white py-3 rounded-xl text-sm font-medium hover:bg-claude-coral-dark transition-colors">
+          Continue
+        </button>
+      </form>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { createBusiness } from '../../lib/api';
+  import { setCurrentBusinessId } from '../../lib/auth';
+
+  document.getElementById('business-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorEl = document.getElementById('error-msg')!;
+    errorEl.classList.add('hidden');
+    const data: any = {
+      name: (document.getElementById('name') as HTMLInputElement).value,
+      legal_entity: (document.getElementById('legal_entity') as HTMLInputElement).value || undefined,
+      industry: (document.getElementById('industry') as HTMLInputElement).value || undefined,
+      revenue_estimate: parseFloat((document.getElementById('revenue') as HTMLInputElement).value) || undefined,
+    };
+    try {
+      const business: any = await createBusiness(data);
+      setCurrentBusinessId(business.id);
+      window.location.href = '/onboarding/stripe-connect';
+    } catch (err: any) {
+      errorEl.textContent = err?.error?.message ?? 'Failed to create business';
+      errorEl.classList.remove('hidden');
+    }
+  });
+</script>

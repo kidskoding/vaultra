@@ -31,3 +31,19 @@ All code structure, validation, and implementation details live in those spec do
 
 - **Implementation:** Read `docs/SPECIFICATION_INDEX.md` and the spec it points to for your task.
 - **Issues/commits:** Read `.github/prompts/ISSUE_PROMPT.md` and `.github/prompts/COMMIT_PROMPT.md`.
+
+- **Instruction**: Before ending any substantial coding session, review and, if useful, update the `## Project Working Memory` section below.
+
+## Working Memory & Live Updates
+
+- **Authority to edit**: You MAY and SHOULD edit this `CLAUDE.md` file to keep project memory accurate and up to date when it helps future work.
+- **Working Memory section**: Maintain the section `## Project Working Memory` below as the single source of truth for evolving, high-signal context (architecture decisions, naming conventions, non-obvious workflows, gotchas, etc.).
+- **When to update**:
+  - After completing any non-trivial task (new feature, refactor, important bug fix).
+  - When you learn something about the codebase or workflow that would save future agents time or prevent mistakes.
+  - When earlier notes become outdated or misleading (update or delete them).
+- **How to update**:
+  - Keep items short and concrete (bullets over prose).
+  - Prefer general rules and patterns over single-use trivia.
+  - Remove stale or low-value details instead of letting this section grow endlessly.
+- **Priority**: Treat keeping `## Project Working Memory` accurate and concise as a high-priority step before you finish a substantial task.

@@ -1,0 +1,13 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import RecommendationList from '../../components/RecommendationList';
+---
+<DashboardLayout title="Recommendations">
+  <div class="space-y-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-claude-text tracking-tight">Recommendations</h1>
+      <p class="text-sm text-claude-text-secondary mt-1 mb-6">Actions to improve your funding readiness score.</p>
+    </div>
+    <RecommendationList client:load />
+  </div>
+</DashboardLayout>

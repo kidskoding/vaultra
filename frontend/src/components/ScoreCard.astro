@@ -1,0 +1,36 @@
+---
+interface Props {
+  score: number;
+  tier: string;
+  trend?: 'improving' | 'stable' | 'declining';
+}
+
+const { score, tier, trend } = Astro.props;
+
+const tierConfig: Record<string, { label: string; color: string }> = {
+  not_ready: { label: 'Not ready', color: 'bg-red-100 text-red-700' },
+  improving: { label: 'Improving', color: 'bg-yellow-100 text-yellow-700' },
+  funding_ready: { label: 'Funding-ready', color: 'bg-green-100 text-green-700' },
+  highly_attractive: { label: 'Highly attractive', color: 'bg-blue-100 text-blue-700' },
+};
+
+const trendIcon = trend === 'improving' ? '↑' : trend === 'declining' ? '↓' : '→';
+const trendColor = trend === 'improving' ? 'text-green-600' : trend === 'declining' ? 'text-red-600' : 'text-gray-500';
+
+const config = tierConfig[tier] ?? { label: tier, color: 'bg-gray-100 text-gray-700' };
+---
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+  <div class="flex items-start justify-between">
+    <div>
+      <p class="text-sm font-medium text-gray-500">Funding Readiness</p>
+      <div class="mt-2 flex items-end gap-3">
+        <span class="text-6xl font-bold text-gray-900">{score}</span>
+        <span class="text-2xl text-gray-400 mb-1">/100</span>
+        {trend && <span class={`text-2xl mb-1 ${trendColor}`}>{trendIcon}</span>}
+      </div>
+    </div>
+    <span class={`px-3 py-1 rounded-full text-sm font-medium ${config.color}`}>
+      {config.label}
+    </span>
+  </div>
+</div>

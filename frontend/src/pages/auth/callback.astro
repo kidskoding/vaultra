@@ -1,0 +1,19 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Authenticating...">
+  <div class="min-h-screen flex items-center justify-center">
+    <p class="text-gray-500">Completing sign-in...</p>
+  </div>
+</BaseLayout>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  if (token) {
+    localStorage.setItem('vaultra_token', token);
+    window.location.href = '/dashboard';
+  } else {
+    window.location.href = '/auth/login';
+  }
+</script>

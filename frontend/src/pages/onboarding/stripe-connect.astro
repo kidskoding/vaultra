@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Connect Stripe">
+  <div class="min-h-screen flex items-center justify-center bg-claude-bg px-4">
+    <div class="w-full max-w-md bg-claude-cream rounded-2xl border border-claude-sand p-8 text-center">
+      <div class="w-16 h-16 bg-claude-coral/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <svg class="w-8 h-8 text-claude-coral" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <h1 class="text-xl font-semibold text-claude-charcoal mb-2">Connect your Stripe account</h1>
+      <p class="text-sm text-claude-gray-warm mb-8 leading-relaxed">
+        Vaultra reads your Stripe data to calculate your funding readiness score.
+        We never store card data or move money.
+      </p>
+      <button id="connect-btn" class="w-full bg-claude-coral text-white py-3 rounded-xl font-medium hover:bg-claude-coral-dark transition-colors mb-4">
+        Connect Stripe
+      </button>
+      <a href="/dashboard" class="text-sm text-claude-gray-warm hover:text-claude-charcoal transition-colors">Skip for now</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initiateStripeConnect } from '../../lib/api';
+  import { getCurrentBusinessId } from '../../lib/auth';
+
+  document.getElementById('connect-btn')?.addEventListener('click', () => {
+    const businessId = getCurrentBusinessId();
+    if (!businessId) { window.location.href = '/onboarding/business'; return; }
+    initiateStripeConnect(businessId);
+  });
+</script>

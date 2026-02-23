@@ -1,0 +1,59 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Sign up">
+  <div class="min-h-screen flex items-center justify-center bg-claude-bg px-4">
+    <div class="w-full max-w-sm bg-claude-surface rounded-2xl border border-claude-border p-8">
+      <div class="text-center mb-8">
+        <a href="/" class="text-2xl font-bold text-claude-text tracking-tight">Vaultra</a>
+        <p class="text-claude-text-secondary text-sm mt-2">Create your account</p>
+      </div>
+
+      <form id="signup-form" class="space-y-4">
+        <div>
+          <label for="name" class="block text-sm font-medium text-claude-text mb-1.5">Name</label>
+          <input id="name" type="text" required class="w-full border border-claude-border rounded-xl px-4 py-2.5 text-sm bg-claude-bg-secondary text-claude-text focus:outline-none focus:ring-2 focus:ring-claude-orange/50 focus:border-claude-orange transition-colors" />
+        </div>
+        <div>
+          <label for="email" class="block text-sm font-medium text-claude-text mb-1.5">Email</label>
+          <input id="email" type="email" required class="w-full border border-claude-border rounded-xl px-4 py-2.5 text-sm bg-claude-bg-secondary text-claude-text focus:outline-none focus:ring-2 focus:ring-claude-orange/50 focus:border-claude-orange transition-colors" />
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-claude-text mb-1.5">Password</label>
+          <input id="password" type="password" required minlength="8" class="w-full border border-claude-border rounded-xl px-4 py-2.5 text-sm bg-claude-bg-secondary text-claude-text focus:outline-none focus:ring-2 focus:ring-claude-orange/50 focus:border-claude-orange transition-colors" />
+        </div>
+        <div id="error-msg" class="text-red-400 text-sm hidden"></div>
+        <button type="submit" class="w-full bg-claude-orange text-white py-3 rounded-xl text-sm font-medium hover:bg-claude-orange-hover transition-colors">
+          Create account
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-claude-text-secondary mt-6">
+        Already have an account? <a href="/auth/login" class="text-claude-orange hover:underline">Sign in</a>
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { signup } from '../../lib/api';
+  import { setToken } from '../../lib/auth';
+
+  document.getElementById('signup-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = (document.getElementById('name') as HTMLInputElement).value;
+    const email = (document.getElementById('email') as HTMLInputElement).value;
+    const password = (document.getElementById('password') as HTMLInputElement).value;
+    const errorEl = document.getElementById('error-msg')!;
+    errorEl.classList.add('hidden');
+
+    try {
+      const data: any = await signup(email, password, name);
+      setToken(data.token);
+      window.location.href = '/onboarding/business';
+    } catch (err: any) {
+      errorEl.textContent = err?.error?.message ?? 'Signup failed';
+      errorEl.classList.remove('hidden');
+    }
+  });
+</script>
