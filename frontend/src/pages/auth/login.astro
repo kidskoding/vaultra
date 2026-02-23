@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Sign in">
+  <div class="min-h-screen flex items-center justify-center bg-claude-bg px-4">
+    <div class="w-full max-w-sm bg-claude-surface rounded-2xl border border-claude-border p-8">
+      <div class="text-center mb-8">
+        <a href="/" class="text-2xl font-bold text-claude-text tracking-tight">Vaultra</a>
+        <p class="text-claude-text-secondary text-sm mt-2">Sign in to your account</p>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label for="email" class="block text-sm font-medium text-claude-text mb-1.5">Email</label>
+          <input id="email" type="email" required class="w-full border border-claude-border rounded-xl px-4 py-2.5 text-sm bg-claude-bg-secondary text-claude-text focus:outline-none focus:ring-2 focus:ring-claude-orange/50 focus:border-claude-orange transition-colors" />
+        </div>
+        <div>
+          <label for="password" class="block text-sm font-medium text-claude-text mb-1.5">Password</label>
+          <input id="password" type="password" required class="w-full border border-claude-border rounded-xl px-4 py-2.5 text-sm bg-claude-bg-secondary text-claude-text focus:outline-none focus:ring-2 focus:ring-claude-orange/50 focus:border-claude-orange transition-colors" />
+        </div>
+        <div id="error-msg" class="text-red-400 text-sm hidden"></div>
+        <button type="submit" class="w-full bg-claude-orange text-white py-3 rounded-xl text-sm font-medium hover:bg-claude-orange-hover transition-colors">
+          Sign in
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-claude-text-secondary mt-6">
+        Don't have an account? <a href="/auth/signup" class="text-claude-orange hover:underline">Sign up</a>
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { login } from '../../lib/api';
+  import { setToken, setCurrentBusinessId } from '../../lib/auth';
+
+  document.getElementById('login-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = (document.getElementById('email') as HTMLInputElement).value;
+    const password = (document.getElementById('password') as HTMLInputElement).value;
+    const errorEl = document.getElementById('error-msg')!;
+    errorEl.classList.add('hidden');
+
+    try {
+      const data: any = await login(email, password);
+      setToken(data.token);
+      if (data.user?.businesses?.length > 0) {
+        setCurrentBusinessId(data.user.businesses[0].id);
+        window.location.href = '/dashboard';
+      } else {
+        // No business yet, go to onboarding
+        window.location.href = '/onboarding/business';
+      }
+    } catch (err: any) {
+      errorEl.textContent = err?.error?.message ?? 'Invalid credentials';
+      errorEl.classList.remove('hidden');
+    }
+  });
+</script>
