@@ -19,40 +19,54 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 interface Props {
   businessId?: string;
   type?: 'revenue' | 'volatility' | 'chargebacks' | 'readiness';
+  /** Pre-fetched metrics data - if provided, skips internal fetch */
+  metrics?: any[];
+  /** External loading state - used when metrics are provided by parent */
+  loading?: boolean;
 }
 
-export default function MetricsChart({ businessId, type = 'revenue' }: Props) {
-  const [metrics, setMetrics] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function MetricsChart({ businessId, type = 'revenue', metrics: externalMetrics, loading: externalLoading }: Props) {
+  const [internalMetrics, setInternalMetrics] = useState<any[]>([]);
+  const [internalLoading, setInternalLoading] = useState(true);
   const [error, setError] = useState('');
 
   const bid = businessId || getCurrentBusinessId();
 
+  // Use external data if provided, otherwise fetch internally
+  const metrics = externalMetrics ?? internalMetrics;
+  const loading = externalLoading ?? internalLoading;
+
   useEffect(() => {
+    // Skip fetch if external metrics are provided
+    if (externalMetrics !== undefined) {
+      setInternalLoading(false);
+      return;
+    }
+
     if (!bid) {
-      setLoading(false);
+      setInternalLoading(false);
       setError('No business selected');
       return;
     }
     getMetricHistory(bid)
-      .then((data: any) => setMetrics(data.metrics || []))
+      .then((data: any) => setInternalMetrics(data.metrics || []))
       .catch(() => setError('Failed to load metrics'))
-      .finally(() => setLoading(false));
-  }, [bid]);
+      .finally(() => setInternalLoading(false));
+  }, [bid, externalMetrics]);
 
   if (loading) return (
     <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 animate-pulse">
-      <div className="h-4 bg-[#3c3836] rounded-md w-2/5 mb-4"></div>
+      <div className="h-4 bg-[#3c3836] rounded-md w-2/5 mb-5"></div>
       <div className="h-48 bg-[#3c3836] rounded-xl"></div>
     </div>
   );
   if (error) return (
-    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 text-red-400 text-sm animate-fade-in">
+    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 hover:border-[#da7756]/30 transition-colors text-red-400 text-sm animate-fade-in">
       {error}
     </div>
   );
   if (!metrics.length) return (
-    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 text-[#a8a29e] text-sm animate-fade-in">
+    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 hover:border-[#da7756]/30 transition-colors text-[#a8a29e] text-sm animate-fade-in">
       No metrics data yet.
     </div>
   );
@@ -73,8 +87,8 @@ export default function MetricsChart({ businessId, type = 'revenue' }: Props) {
   };
 
   return (
-    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 animate-fade-in">
-      <h3 className="text-sm font-medium text-[#a8a29e] mb-4">{cfg.label} Over Time</h3>
+    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 hover:border-[#da7756]/30 transition-colors animate-fade-in">
+      <h3 className="text-sm font-medium text-[#a8a29e] mb-5">{cfg.label} Over Time</h3>
       <Line data={chartData} options={{ responsive: true, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: '#78716c' } }, y: { grid: { color: '#44403c' }, ticks: { color: '#78716c' } } } }} />
     </div>
   );
