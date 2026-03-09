@@ -94,9 +94,17 @@ export default function SettingsPage() {
       <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${qbStatus?.connected ? 'bg-emerald-500/10' : 'bg-[#3c3836]'}`}>
-              <svg className="w-6 h-6 text-[#2CA01C]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden bg-white">
+              <svg
+                viewBox="0 0 128 128"
+                className="w-10 h-10"
+                aria-hidden="true"
+              >
+                <path d="M64 128c35.346 0 64-28.654 64-64S99.346 0 64 0 0 28.654 0 64s28.654 64 64 64z" fill="#2ca01c" />
+                <path
+                  d="M17.778 64a24.889 24.889 0 0 0 24.889 24.889h3.555v-9.245h-3.555a15.645 15.645 0 1 1 0-31.289H51.2v48.356a9.248 9.248 0 0 0 9.244 9.245V39.111H42.667A24.889 24.889 0 0 0 17.777 64zm67.555-24.889h-3.555v9.245h3.555a15.645 15.645 0 0 1 0 31.288H76.8V31.29a9.244 9.244 0 0 0-9.244-9.245V88.89h17.777a24.888 24.888 0 0 0 0-49.778z"
+                  fill="#fff"
+                />
               </svg>
             </div>
             <div>
@@ -109,28 +117,23 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          {qbStatus?.connected ? (
-            <div className="flex items-center gap-4">
-              <span className="text-xs px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-full font-medium">
-                Connected
-              </span>
-              <button
-                onClick={handleQuickBooksDisconnect}
-                disabled={disconnecting}
-                className="text-sm px-5 py-2.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {disconnecting ? 'Disconnecting...' : 'Disconnect'}
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={handleQuickBooksConnect}
-              disabled={connecting}
-              className="text-sm px-5 py-2.5 bg-[#2CA01C] text-white rounded-lg hover:bg-[#238816] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {connecting ? 'Connecting...' : 'Connect'}
-            </button>
-          )}
+          <button
+            onClick={qbStatus?.connected ? handleQuickBooksDisconnect : handleQuickBooksConnect}
+            disabled={qbStatus?.connected ? disconnecting : connecting}
+            className={`text-sm px-5 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              qbStatus?.connected
+                ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                : 'bg-[#2CA01C] text-white hover:bg-[#238816]'
+            }`}
+          >
+            {qbStatus?.connected
+              ? disconnecting
+                ? 'Disconnecting...'
+                : 'Disconnect'
+              : connecting
+              ? 'Connecting...'
+              : 'Connect'}
+          </button>
         </div>
 
         {error && (

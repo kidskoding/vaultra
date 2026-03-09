@@ -147,6 +147,8 @@ export async function getConversation(conversationId: string) {
 // QuickBooks
 export async function initiateQuickBooksConnect(businessId: string) {
   try {
+    // Clear any cached status so we always refetch after OAuth
+    bustCache(`/integrations/quickbooks/status?business_id=${businessId}`);
     const response = await apiRequest<{ url: string }>(`/integrations/quickbooks/connect?business_id=${businessId}`);
     window.location.href = response.url;
   } catch (error: unknown) {
@@ -167,6 +169,12 @@ export async function getQuickBooksStatus(businessId: string) {
 }
 
 export async function disconnectQuickBooks(businessId: string) {
+  // Bust cached data that depends on QuickBooks connection
+  bustCache(`/integrations/quickbooks/status?business_id=${businessId}`);
+  bustCache(`/metrics?business_id=${businessId}`);
+  bustCache(`/metrics/history?business_id=${businessId}`);
+  bustCache(`/readiness?business_id=${businessId}`);
+  bustCache(`/readiness/history?business_id=${businessId}`);
   return apiRequest(`/integrations/quickbooks/disconnect?business_id=${businessId}`, { method: 'DELETE' });
 }
 

@@ -11,7 +11,7 @@ import {
   Filler,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { getMetricHistory } from '../lib/api';
+import { getMetricHistory, getQuickBooksStatus } from '../lib/api';
 import { getCurrentBusinessId } from '../lib/auth';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
@@ -29,6 +29,7 @@ export default function MetricsChart({ businessId, type = 'revenue', metrics: ex
   const [internalMetrics, setInternalMetrics] = useState<any[]>([]);
   const [internalLoading, setInternalLoading] = useState(true);
   const [error, setError] = useState('');
+  const [connected, setConnected] = useState<boolean | null>(null);
 
   const bid = businessId || getCurrentBusinessId();
 
@@ -37,21 +38,40 @@ export default function MetricsChart({ businessId, type = 'revenue', metrics: ex
   const loading = externalLoading ?? internalLoading;
 
   useEffect(() => {
-    // Skip fetch if external metrics are provided
-    if (externalMetrics !== undefined) {
-      setInternalLoading(false);
-      return;
+    async function load() {
+      // Skip fetch if external metrics are provided
+      if (externalMetrics !== undefined) {
+        setInternalLoading(false);
+        return;
+      }
+
+      if (!bid) {
+        setInternalLoading(false);
+        setError('No business selected');
+        return;
+      }
+
+      try {
+        const status = await getQuickBooksStatus(bid);
+        const isConnected = Boolean((status as any).connected);
+        setConnected(isConnected);
+
+        if (!isConnected) {
+          setError('Connect QuickBooks to view metrics.');
+          setInternalLoading(false);
+          return;
+        }
+
+        const data: any = await getMetricHistory(bid);
+        setInternalMetrics(data.metrics || []);
+      } catch {
+        setError('Failed to load metrics');
+      } finally {
+        setInternalLoading(false);
+      }
     }
 
-    if (!bid) {
-      setInternalLoading(false);
-      setError('No business selected');
-      return;
-    }
-    getMetricHistory(bid)
-      .then((data: any) => setInternalMetrics(data.metrics || []))
-      .catch(() => setError('Failed to load metrics'))
-      .finally(() => setInternalLoading(false));
+    load();
   }, [bid, externalMetrics]);
 
   if (loading) return (
@@ -60,11 +80,15 @@ export default function MetricsChart({ businessId, type = 'revenue', metrics: ex
       <div className="h-48 bg-[#3c3836] rounded-xl"></div>
     </div>
   );
-  if (error) return (
-    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 hover:border-[#da7756]/30 transition-colors text-red-400 text-sm animate-fade-in">
-      {error}
-    </div>
-  );
+  if (error) {
+    return (
+      <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 hover:border-[#da7756]/30 transition-colors text-sm animate-fade-in">
+        <p className={connected === false ? 'text-[#a8a29e]' : 'text-red-400'}>
+          {error}
+        </p>
+      </div>
+    );
+  }
   if (!metrics.length) return (
     <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 hover:border-[#da7756]/30 transition-colors text-[#a8a29e] text-sm animate-fade-in">
       No metrics data yet.

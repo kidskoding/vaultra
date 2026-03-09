@@ -26,17 +26,17 @@ class QuickBooksService:
 
     async def initiate_connect(self, business_id: UUID) -> str:
         """Generate OAuth URL for QuickBooks connection."""
-        # Check if business exists, create mock one in dev mode if not
+        # Ensure business exists
         result = await self.db.execute(
             select(Business).where(Business.id == business_id)
         )
         business = result.scalar_one_or_none()
 
-        if not business and (not settings.QUICKBOOKS_CLIENT_ID or settings.DEV_MODE):
+        if not business:
             business = Business(
                 id=business_id,
-                name="Test Business",
-                industry="technology",
+                name="QuickBooks Business",
+                industry="unknown",
             )
             self.db.add(business)
             await self.db.commit()
@@ -50,24 +50,17 @@ class QuickBooksService:
         )
         integration = result.scalar_one_or_none()
 
-        # Dev mode: create fake connection
-        if not settings.QUICKBOOKS_CLIENT_ID or settings.DEV_MODE:
-            if not integration:
-                fake_realm_id = f"realm_test_{business_id.hex[:16]}"
-                integration = IntegrationAccount(
-                    business_id=business_id,
-                    provider="quickbooks",
-                    external_id=fake_realm_id,
-                    status="active",
-                    metadata_={
-                        "company_name": "Test Company",
-                        "environment": "sandbox",
-                    },
-                )
-                self.db.add(integration)
-                await self.db.commit()
-                await self.db.refresh(integration)
-            return f"{settings.FRONTEND_BASE_URL}/onboarding/quickbooks-success?business_id={business_id}"
+        # Require real OAuth configuration
+        if not settings.QUICKBOOKS_CLIENT_ID or not settings.QUICKBOOKS_CLIENT_SECRET:
+            raise HTTPException(
+                status_code=500,
+                detail={
+                    "error": {
+                        "code": "QUICKBOOKS_NOT_CONFIGURED",
+                        "message": "QuickBooks OAuth is not configured on the server.",
+                    }
+                },
+            )
 
         # Generate state token for CSRF protection (store business_id)
         state = str(business_id)
