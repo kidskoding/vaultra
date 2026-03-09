@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { chatWithAgent } from '../lib/api';
 import { getCurrentBusinessId } from '../lib/auth';
 
@@ -103,13 +104,37 @@ export default function AgentChat({ businessId, conversationId: initialConvId }:
               </div>
             )}
             <div
-              className={`max-w-[78%] px-4 py-3 text-sm leading-relaxed ${
+              className={`max-w-[680px] px-4 py-3 text-sm leading-relaxed ${
                 msg.role === 'user'
                   ? 'bg-[#da7756] text-white rounded-2xl rounded-br-sm'
                   : 'bg-[#3c3836] text-[#ede9e3] rounded-2xl rounded-bl-sm'
               }`}
             >
-              {msg.content}
+              {msg.role === 'assistant' ? (
+                <ReactMarkdown
+                  components={{
+                    p: ({ node, ...props }) => (
+                      <p className="mb-1.5 last:mb-0 whitespace-pre-wrap" {...props} />
+                    ),
+                    strong: ({ node, ...props }) => (
+                      <strong className="font-semibold" {...props} />
+                    ),
+                    ul: ({ node, ...props }) => (
+                      <ul className="list-disc list-inside space-y-1 mb-1.5 last:mb-0" {...props} />
+                    ),
+                    ol: ({ node, ...props }) => (
+                      <ol className="list-decimal list-inside space-y-1 mb-1.5 last:mb-0" {...props} />
+                    ),
+                    li: ({ node, ...props }) => (
+                      <li className="whitespace-normal" {...props} />
+                    ),
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              ) : (
+                <span className="whitespace-pre-wrap">{msg.content}</span>
+              )}
             </div>
           </div>
         ))}
