@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.1:8b"
     DEV_MODE: bool = False
+    VAULTRA_SEED_BUSINESS_ID: str | None = None
 
     class Config:
         env_file = ".env"
