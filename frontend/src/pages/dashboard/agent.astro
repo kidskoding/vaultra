@@ -1,41 +1,16 @@
 ---
 import DashboardLayout from '../../layouts/DashboardLayout.astro';
 import AgentChat from '../../components/AgentChat';
-import { getQuickBooksStatus } from '../../lib/api';
-import { getCurrentBusinessId } from '../../lib/auth';
-
-const bid = getCurrentBusinessId();
-const status = bid ? await getQuickBooksStatus(bid).catch(() => ({ connected: false })) : { connected: false };
-const connected = status.connected ?? false;
 ---
 <DashboardLayout title="AI Agent">
   <div class="space-y-6">
     <div>
       <h1 class="text-2xl font-semibold text-claude-text tracking-tight">AI Advisor</h1>
       <p class="text-sm text-claude-text-secondary mt-1 mb-6">
-        {connected
-          ? 'Ask anything about your funding readiness and QuickBooks metrics.'
-          : 'Connect QuickBooks to unlock personalized funding insights.'}
+        Ask anything about your funding readiness and QuickBooks metrics.
       </p>
     </div>
 
-    {connected ? (
-      <AgentChat client:load />
-    ) : (
-      <div class="bg-[#292524] rounded-2xl border border-[#44403c] p-6 flex items-center justify-between">
-        <div>
-          <p class="text-sm font-medium text-[#ede9e3] mb-1">Connect QuickBooks to chat with your AI advisor</p>
-          <p class="text-xs text-[#78716c]">
-            The agent needs access to your financial metrics to give accurate, tailored guidance.
-          </p>
-        </div>
-        <a
-          href="/dashboard/settings?connect=quickbooks"
-          class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-xl bg-[#da7756] text-white hover:bg-[#c96b4d] transition-colors"
-        >
-          Connect QuickBooks
-        </a>
-      </div>
-    )}
+    <AgentChat client:load />
   </div>
 </DashboardLayout>

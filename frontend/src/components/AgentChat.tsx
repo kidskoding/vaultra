@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { chatWithAgent } from '../lib/api';
+import { chatWithAgent, getQuickBooksStatus } from '../lib/api';
 import { getCurrentBusinessId } from '../lib/auth';
 
 interface Message {
@@ -23,19 +23,48 @@ export default function AgentChat({ businessId, conversationId: initialConvId }:
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [connected, setConnected] = useState<boolean | null>(null);
   const [conversationId, setConversationId] = useState<string | undefined>(initialConvId);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const bid = businessId || getCurrentBusinessId() || '';
 
+  // Scroll to latest message
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Check QuickBooks connection on mount
+  useEffect(() => {
+    if (!bid) {
+      setConnected(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const status: any = await getQuickBooksStatus(bid);
+        if (!cancelled) {
+          setConnected(Boolean(status?.connected));
+        }
+      } catch {
+        if (!cancelled) {
+          setConnected(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [bid]);
+
   const handleSend = async (msg?: string) => {
     const userMsg = (msg ?? input).trim();
-    if (!userMsg || !bid) return;
+    if (!userMsg || !bid || !connected) return;
     setInput('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
     setMessages((prev) => [...prev, { role: 'user', content: userMsg }]);
@@ -63,6 +92,41 @@ export default function AgentChat({ businessId, conversationId: initialConvId }:
     e.target.style.height = 'auto';
     e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
   };
+
+  // While checking connection
+  if (connected === null) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-13rem)] bg-[#292524] rounded-2xl border border-[#44403c] overflow-hidden">
+        <div className="flex-1 flex items-center justify-center text-sm text-[#a8a29e]">
+          Checking QuickBooks connection…
+        </div>
+      </div>
+    );
+  }
+
+  // If not connected, show gating card instead of chat
+  if (!connected) {
+    return (
+      <div className="flex flex-col h-[calc(100vh-13rem)] bg-[#292524] rounded-2xl border border-[#44403c] overflow-hidden">
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="max-w-xl w-full bg-[#1c1917] border border-[#44403c] rounded-2xl p-6 flex items-center justify-between gap-6">
+            <div>
+              <p className="text-sm font-medium text-[#ede9e3] mb-1">Connect QuickBooks to chat with your AI advisor</p>
+              <p className="text-xs text-[#78716c]">
+                The agent needs access to your financial metrics to give accurate, tailored guidance.
+              </p>
+            </div>
+            <a
+              href="/dashboard/settings?connect=quickbooks"
+              className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium rounded-xl bg-[#da7756] text-white hover:bg-[#c96b4d] transition-colors shrink-0"
+            >
+              Connect QuickBooks
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-13rem)] bg-[#292524] rounded-2xl border border-[#44403c] overflow-hidden">
