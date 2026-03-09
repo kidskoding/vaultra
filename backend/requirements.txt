@@ -8,7 +8,7 @@ pydantic-settings>=2.1.0
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
 bcrypt==4.0.1
-stripe>=8.0.0
+intuit-oauth==1.2.6
 pinecone-client>=3.0.0
 openai>=1.10.0
 redis>=5.0.0

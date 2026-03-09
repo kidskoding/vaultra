@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.auth.router import router as auth_router
 from app.users.router import router as users_router
-from app.stripe.router import router as stripe_router
+from app.quickbooks.router import router as quickbooks_router
 from app.metrics.router import router as metrics_router
 from app.recommendations.router import router as recommendations_router
 from app.agent.router import router as agent_router
@@ -43,7 +43,7 @@ async def generic_exception_handler(request: Request, exc: Exception):
 PREFIX = "/api/v1"
 app.include_router(auth_router, prefix=PREFIX)
 app.include_router(users_router, prefix=PREFIX)
-app.include_router(stripe_router, prefix=PREFIX)
+app.include_router(quickbooks_router, prefix=PREFIX)
 app.include_router(metrics_router, prefix=PREFIX)
 app.include_router(recommendations_router, prefix=PREFIX)
 app.include_router(agent_router, prefix=PREFIX)

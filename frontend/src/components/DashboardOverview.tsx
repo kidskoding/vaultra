@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getReadinessScore, getLatestMetrics, getRecommendations, getStripeStatus, initiateStripeConnect, disconnectStripe } from '../lib/api';
+import { getReadinessScore, getLatestMetrics, getRecommendations, getQuickBooksStatus, initiateQuickBooksConnect, disconnectQuickBooks } from '../lib/api';
 import { getCurrentBusinessId } from '../lib/auth';
 
 interface ReadinessData {
@@ -21,16 +21,17 @@ interface Recommendation {
   category: string;
 }
 
-interface StripeStatus {
+interface QuickBooksStatus {
   connected: boolean;
-  account_id?: string;
+  company_id?: string;
+  company_name?: string;
 }
 
 interface DashboardData {
   readiness: ReadinessData | null;
   metrics: MetricsData | null;
   recommendations: Recommendation[];
-  stripe: StripeStatus | null;
+  quickbooks: QuickBooksStatus | null;
 }
 
 const tierLabels: Record<string, string> = {
@@ -131,7 +132,7 @@ function NoScoreCard() {
   return (
     <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 hover:border-[#da7756]/30 transition-colors animate-fade-in">
       <p className="text-sm font-medium text-[#a8a29e] mb-3">Funding Readiness Score</p>
-      <p className="text-sm text-[#78716c]">Connect Stripe to calculate your funding readiness score.</p>
+      <p className="text-sm text-[#78716c]">Connect QuickBooks to calculate your funding readiness score.</p>
     </div>
   );
 }
@@ -156,8 +157,8 @@ function StatsGrid({ metrics }: { metrics: MetricsData | null }) {
   );
 }
 
-function IntegrationStatus({ stripe, businessId, onDisconnect }: { stripe: StripeStatus | null; businessId: string; onDisconnect: () => void }) {
-  const connected = stripe?.connected ?? false;
+function IntegrationStatus({ quickbooks, businessId, onDisconnect }: { quickbooks: QuickBooksStatus | null; businessId: string; onDisconnect: () => void }) {
+  const connected = quickbooks?.connected ?? false;
   const [connecting, setConnecting] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -167,9 +168,9 @@ function IntegrationStatus({ stripe, businessId, onDisconnect }: { stripe: Strip
     setConnecting(true);
     setError(null);
     try {
-      await initiateStripeConnect(businessId);
+      await initiateQuickBooksConnect(businessId);
     } catch (e: any) {
-      setError(e?.error?.message || 'Failed to connect to Stripe');
+      setError(e?.error?.message || 'Failed to connect to QuickBooks');
       setConnecting(false);
     }
   };
@@ -179,7 +180,7 @@ function IntegrationStatus({ stripe, businessId, onDisconnect }: { stripe: Strip
     setDisconnecting(true);
     setError(null);
     try {
-      await disconnectStripe(businessId);
+      await disconnectQuickBooks(businessId);
       onDisconnect();
     } catch (e: any) {
       setError(e?.error?.message || 'Failed to disconnect');
@@ -189,17 +190,17 @@ function IntegrationStatus({ stripe, businessId, onDisconnect }: { stripe: Strip
   };
 
   return (
-    <div className="bg-[#292524] rounded-2xl border border-[#635BFF] p-6 transition-colors animate-fade-in">
+    <div className="bg-[#292524] rounded-2xl border border-[#2CA01C] p-6 transition-colors animate-fade-in">
       <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#635BFF]">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#2CA01C]">
             <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z" />
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
           </div>
           <div>
-            <p className="text-sm font-medium text-[#ede9e3]">Stripe Integration</p>
-            <p className="text-xs text-[#78716c]">{connected ? 'Connected and syncing data' : 'Connect to unlock insights'}</p>
+            <p className="text-sm font-medium text-[#ede9e3]">QuickBooks Integration</p>
+            <p className="text-xs text-[#78716c]">{connected ? `Connected to ${quickbooks?.company_name || 'your account'}` : 'Connect to unlock insights'}</p>
           </div>
         </div>
         {connected ? (
@@ -263,7 +264,7 @@ export default function DashboardOverview() {
     readiness: null,
     metrics: null,
     recommendations: [],
-    stripe: null,
+    quickbooks: null,
   });
   const [loading, setLoading] = useState(true);
 
@@ -280,14 +281,14 @@ export default function DashboardOverview() {
       getReadinessScore(bid).catch(() => null),
       getLatestMetrics(bid).catch(() => null),
       getRecommendations(bid, 'pending').catch(() => ({ recommendations: [] })),
-      getStripeStatus(bid).catch(() => ({ connected: false })),
+      getQuickBooksStatus(bid).catch(() => ({ connected: false })),
     ])
-      .then(([readiness, metrics, recsResponse, stripe]: [any, any, any, any]) => {
+      .then(([readiness, metrics, recsResponse, quickbooks]: [any, any, any, any]) => {
         setData({
           readiness,
           metrics,
           recommendations: recsResponse?.recommendations || [],
-          stripe,
+          quickbooks,
         });
       })
       .finally(() => setLoading(false));
@@ -324,7 +325,7 @@ export default function DashboardOverview() {
           </div>
         </div>
       ) : (
-        <IntegrationStatus stripe={data.stripe} businessId={bid} onDisconnect={() => setData(d => ({ ...d, stripe: { connected: false } }))} />
+        <IntegrationStatus quickbooks={data.quickbooks} businessId={bid} onDisconnect={() => setData(d => ({ ...d, quickbooks: { connected: false } }))} />
       )}
 
       {/* Key Stats */}

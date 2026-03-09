@@ -144,12 +144,32 @@ export async function getConversation(conversationId: string) {
   return apiRequest(`/agent/conversations/${conversationId}`);
 }
 
-// Stripe
-export async function initiateStripeConnect(businessId: string) {
-  const response = await apiRequest<{ url: string }>(`/integrations/stripe/connect?business_id=${businessId}`);
-  window.location.href = response.url;
+// QuickBooks
+export async function initiateQuickBooksConnect(businessId: string) {
+  try {
+    const response = await apiRequest<{ url: string }>(`/integrations/quickbooks/connect?business_id=${businessId}`);
+    window.location.href = response.url;
+  } catch (error: unknown) {
+    const err = error as { error?: { message?: string; code?: string } };
+    const message = err.error?.message || '';
+    const code = err.error?.code || '';
+    if (code === 'UNAUTHORIZED' || message.includes('token') || message.includes('Not authenticated')) {
+      window.location.href = '/auth/login';
+      return;
+    }
+    console.error('Failed to connect QuickBooks:', error);
+    alert(err.error?.message || 'Failed to connect QuickBooks. Please try again.');
+  }
 }
 
-export async function getStripeStatus(businessId: string) {
-  return apiRequest(`/integrations/stripe/status?business_id=${businessId}`);
+export async function getQuickBooksStatus(businessId: string) {
+  return apiRequest(`/integrations/quickbooks/status?business_id=${businessId}`);
+}
+
+export async function disconnectQuickBooks(businessId: string) {
+  return apiRequest(`/integrations/quickbooks/disconnect?business_id=${businessId}`, { method: 'DELETE' });
+}
+
+export async function syncQuickBooksData(businessId: string) {
+  return apiRequest(`/integrations/quickbooks/sync?business_id=${businessId}`, { method: 'POST' });
 }

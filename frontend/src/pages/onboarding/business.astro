@@ -50,7 +50,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     try {
       const business: any = await createBusiness(data);
       setCurrentBusinessId(business.id);
-      window.location.href = '/onboarding/stripe-connect';
+      window.location.href = '/onboarding/quickbooks-connect';
     } catch (err: any) {
       errorEl.textContent = err?.error?.message ?? 'Failed to create business';
       errorEl.classList.remove('hidden');

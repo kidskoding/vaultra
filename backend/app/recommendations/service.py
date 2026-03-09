@@ -56,7 +56,7 @@ class RecommendationsService:
         new_recs = []
 
         if snapshot:
-            if snapshot.chargeback_ratio and float(snapshot.chargeback_ratio) > 0.02:
+            if snapshot.chargeback_ratio is not None and float(snapshot.chargeback_ratio) > 0.02:
                 new_recs.append(Recommendation(
                     business_id=business_id,
                     title="Reduce chargebacks",
@@ -66,7 +66,7 @@ class RecommendationsService:
                     estimated_impact="+10-15 points",
                     metric_refs={"chargeback_ratio": float(snapshot.chargeback_ratio)},
                 ))
-            if snapshot.revenue_volatility and float(snapshot.revenue_volatility) > 0.5:
+            if snapshot.revenue_volatility is not None and float(snapshot.revenue_volatility) > 0.5:
                 new_recs.append(Recommendation(
                     business_id=business_id,
                     title="Stabilize revenue streams",
@@ -76,11 +76,11 @@ class RecommendationsService:
                     estimated_impact="+5-10 points",
                     metric_refs={"revenue_volatility": float(snapshot.revenue_volatility)},
                 ))
-            if snapshot.payout_reliability and float(snapshot.payout_reliability) < 0.80:
+            if snapshot.payout_reliability is not None and float(snapshot.payout_reliability) < 0.80:
                 new_recs.append(Recommendation(
                     business_id=business_id,
                     title="Improve payout timing",
-                    description="Less than 80% of payouts are completing on time. Review your Stripe payout settings.",
+                    description="Less than 80% of payouts are completing on time. Review your payment processor settings.",
                     priority="high",
                     category="cash_flow",
                     estimated_impact="+10 points",

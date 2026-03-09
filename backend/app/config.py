@@ -5,9 +5,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://vaultra:vaultra@localhost:5432/vaultra"
     REDIS_URL: str = "redis://localhost:6379"
     JWT_SECRET: str = "change-me-in-production"
-    STRIPE_SECRET_KEY: str = ""
-    STRIPE_WEBHOOK_SECRET: str = ""
-    STRIPE_CONNECT_CLIENT_ID: str = ""
+    QUICKBOOKS_CLIENT_ID: str = ""
+    QUICKBOOKS_CLIENT_SECRET: str = ""
+    QUICKBOOKS_REDIRECT_URI: str = "http://localhost:8000/api/v1/integrations/quickbooks/callback"
+    QUICKBOOKS_ENVIRONMENT: str = "sandbox"  # or "production"
     FRONTEND_BASE_URL: str = "http://localhost:4321"
     BACKEND_BASE_URL: str = "http://localhost:8000"
     PINECONE_API_KEY: str = ""
@@ -17,6 +18,7 @@ class Settings(BaseSettings):
     LLM_PROVIDER: str = "openai"
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "llama3.1:8b"
+    DEV_MODE: bool = False
 
     class Config:
         env_file = ".env"

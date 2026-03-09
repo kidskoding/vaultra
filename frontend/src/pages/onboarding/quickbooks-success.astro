@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="QuickBooks Connected">
+  <div class="min-h-screen flex items-center justify-center bg-claude-bg px-4">
+    <div class="w-full max-w-md bg-claude-cream rounded-2xl border border-claude-sand p-8 text-center">
+      <div class="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <svg class="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h1 class="text-xl font-semibold text-claude-charcoal mb-2">QuickBooks Connected!</h1>
+      <p class="text-sm text-claude-gray-warm mb-8 leading-relaxed">
+        Your QuickBooks account has been connected successfully. We can now analyze your financial data.
+      </p>
+      <a href="/dashboard" class="w-full bg-claude-coral text-white py-3 rounded-xl font-medium hover:bg-claude-coral-dark transition-colors block">
+        Go to Dashboard
+      </a>
+    </div>
+  </div>
+</BaseLayout>

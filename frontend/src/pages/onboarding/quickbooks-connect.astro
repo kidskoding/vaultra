@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Connect QuickBooks">
+  <div class="min-h-screen flex items-center justify-center bg-claude-bg px-4">
+    <div class="w-full max-w-md bg-claude-cream rounded-2xl border border-claude-sand p-8 text-center">
+      <div class="w-16 h-16 bg-[#2CA01C]/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+        <svg class="w-8 h-8 text-[#2CA01C]" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+        </svg>
+      </div>
+      <h1 class="text-xl font-semibold text-claude-charcoal mb-2">Connect your QuickBooks account</h1>
+      <p class="text-sm text-claude-gray-warm mb-8 leading-relaxed">
+        Vaultra reads your QuickBooks data to calculate your funding readiness score.
+        We only access financial reports and never modify your data.
+      </p>
+      <button id="connect-btn" class="w-full bg-[#2CA01C] text-white py-3 rounded-xl font-medium hover:bg-[#238816] transition-colors mb-4">
+        Connect QuickBooks
+      </button>
+      <a href="/dashboard" class="text-sm text-claude-gray-warm hover:text-claude-charcoal transition-colors">Skip for now</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { initiateQuickBooksConnect } from '../../lib/api';
+  import { getCurrentBusinessId, setCurrentBusinessId } from '../../lib/auth';
+
+  document.getElementById('connect-btn')?.addEventListener('click', () => {
+    // Check URL param first, then localStorage
+    const params = new URLSearchParams(window.location.search);
+    let businessId = params.get('business_id') || getCurrentBusinessId();
+
+    if (!businessId) {
+      window.location.href = '/onboarding/business';
+      return;
+    }
+
+    // Store it for future use
+    setCurrentBusinessId(businessId);
+    initiateQuickBooksConnect(businessId);
+  });
+</script>
