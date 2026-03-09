@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getReadinessScore, getLatestMetrics, getRecommendations, getStripeStatus } from '../lib/api';
+import { getReadinessScore, getLatestMetrics, getRecommendations, getStripeStatus, initiateStripeConnect, disconnectStripe } from '../lib/api';
 import { getCurrentBusinessId } from '../lib/auth';
 
 interface ReadinessData {
@@ -81,9 +81,9 @@ function ScoreSkeleton() {
 
 function StatsSkeleton() {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="bg-[#292524] rounded-2xl border border-[#44403c] p-5 animate-pulse">
+        <div key={i} className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 animate-pulse">
           <div className="h-3 bg-[#3c3836] rounded w-1/2 mb-3"></div>
           <div className="h-7 bg-[#3c3836] rounded w-2/3"></div>
         </div>
@@ -94,11 +94,11 @@ function StatsSkeleton() {
 
 function RecommendationsSkeleton() {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="bg-[#292524] rounded-xl border border-[#44403c] p-4 animate-pulse">
+        <div key={i} className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 animate-pulse">
           <div className="flex items-center gap-3">
-            <div className="h-5 w-14 bg-[#3c3836] rounded-full"></div>
+            <div className="h-6 w-16 bg-[#3c3836] rounded-full"></div>
             <div className="h-4 bg-[#3c3836] rounded w-3/4"></div>
           </div>
         </div>
@@ -138,8 +138,8 @@ function NoScoreCard() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-5 hover:border-[#da7756]/30 transition-colors animate-fade-in">
-      <p className="text-xs font-medium text-[#78716c] mb-2">{label}</p>
+    <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 hover:border-[#da7756]/30 transition-colors animate-fade-in">
+      <p className="text-xs font-medium text-[#78716c] mb-3">{label}</p>
       <p className="text-xl font-semibold text-[#ede9e3]">{value}</p>
     </div>
   );
@@ -156,21 +156,42 @@ function StatsGrid({ metrics }: { metrics: MetricsData | null }) {
   );
 }
 
-function IntegrationStatus({ stripe, businessId }: { stripe: StripeStatus | null; businessId: string }) {
+function IntegrationStatus({ stripe, businessId, onDisconnect }: { stripe: StripeStatus | null; businessId: string; onDisconnect: () => void }) {
   const connected = stripe?.connected ?? false;
-  const handleConnect = () => {
+  const [connecting, setConnecting] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleConnect = async () => {
     if (!businessId) return;
-    import('../lib/api')
-      .then(({ initiateStripeConnect }) => initiateStripeConnect(businessId))
-      .catch(() => {
-        // No-op: settings page shows errors; dashboard just tries to redirect.
-      });
+    setConnecting(true);
+    setError(null);
+    try {
+      await initiateStripeConnect(businessId);
+    } catch (e: any) {
+      setError(e?.error?.message || 'Failed to connect to Stripe');
+      setConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    if (!businessId) return;
+    setDisconnecting(true);
+    setError(null);
+    try {
+      await disconnectStripe(businessId);
+      onDisconnect();
+    } catch (e: any) {
+      setError(e?.error?.message || 'Failed to disconnect');
+    } finally {
+      setDisconnecting(false);
+    }
   };
 
   return (
-    <div className="bg-[#292524] rounded-2xl border border-[#635BFF] p-5 transition-colors animate-fade-in">
+    <div className="bg-[#292524] rounded-2xl border border-[#635BFF] p-6 transition-colors animate-fade-in">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#635BFF]">
             <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z" />
@@ -181,15 +202,25 @@ function IntegrationStatus({ stripe, businessId }: { stripe: StripeStatus | null
             <p className="text-xs text-[#78716c]">{connected ? 'Connected and syncing data' : 'Connect to unlock insights'}</p>
           </div>
         </div>
-        {!connected && (
+        {connected ? (
+          <button
+            onClick={handleDisconnect}
+            disabled={disconnecting}
+            className="text-xs px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50"
+          >
+            {disconnecting ? 'Disconnecting...' : 'Disconnect'}
+          </button>
+        ) : (
           <button
             onClick={handleConnect}
-            className="text-xs px-4 py-2 bg-[#da7756] text-white rounded-lg hover:bg-[#c96b4d] transition-colors"
+            disabled={connecting}
+            className="text-xs px-4 py-2 bg-[#da7756] text-white rounded-lg hover:bg-[#c96b4d] transition-colors disabled:opacity-50"
           >
-            Connect
+            {connecting ? 'Connecting...' : 'Connect'}
           </button>
         )}
       </div>
+      {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
     </div>
   );
 }
@@ -197,18 +228,18 @@ function IntegrationStatus({ stripe, businessId }: { stripe: StripeStatus | null
 function TopRecommendations({ recommendations }: { recommendations: Recommendation[] }) {
   if (!recommendations.length) {
     return (
-      <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-5 text-sm text-[#a8a29e] animate-fade-in">
+      <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 text-sm text-[#a8a29e] animate-fade-in">
         No pending recommendations. You're on track!
       </div>
     );
   }
 
   return (
-    <div className="space-y-3 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {recommendations.slice(0, 3).map((rec) => (
-        <div key={rec.id} className="bg-[#292524] rounded-xl border border-[#44403c] p-4 hover:border-[#da7756]/30 transition-colors">
-          <div className="flex items-center gap-3">
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${PRIORITY_COLORS[rec.priority] ?? PRIORITY_COLORS.low}`}>
+        <div key={rec.id} className="bg-[#292524] rounded-2xl border border-[#44403c] p-8 hover:border-[#da7756]/30 transition-colors">
+          <div className="flex items-center gap-4">
+            <span className={`text-xs px-3 py-1.5 rounded-full font-medium ${PRIORITY_COLORS[rec.priority] ?? PRIORITY_COLORS.low}`}>
               {rec.priority}
             </span>
             <p className="text-sm text-[#ede9e3] flex-1">{rec.title}</p>
@@ -218,7 +249,7 @@ function TopRecommendations({ recommendations }: { recommendations: Recommendati
       {recommendations.length > 3 && (
         <a
           href="/dashboard/recommendations"
-          className="block text-center text-sm text-[#da7756] hover:text-[#c96b4d] transition-colors py-2"
+          className="block text-center text-sm text-[#da7756] hover:text-[#c96b4d] transition-colors py-3"
         >
           View all {recommendations.length} recommendations
         </a>
@@ -271,41 +302,36 @@ export default function DashboardOverview() {
   }
 
   return (
-    <div className="space-y-6 pt-2">
+    <div className="space-y-8 mt-6">
       {/* Funding Readiness Score */}
-      <section>
-        {loading ? (
-          <ScoreSkeleton />
-        ) : data.readiness ? (
-          <ScoreCard data={data.readiness} />
-        ) : (
-          <NoScoreCard />
-        )}
-      </section>
+      {loading ? (
+        <ScoreSkeleton />
+      ) : data.readiness ? (
+        <ScoreCard data={data.readiness} />
+      ) : (
+        <NoScoreCard />
+      )}
 
       {/* Integration Status */}
-      <section>
-        {!loading && <IntegrationStatus stripe={data.stripe} businessId={bid} />}
-      </section>
+      {loading ? (
+        <div className="bg-[#292524] rounded-2xl border border-[#44403c] p-6 animate-pulse">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-[#3c3836] rounded-xl"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-[#3c3836] rounded w-1/4 mb-3"></div>
+              <div className="h-3 bg-[#3c3836] rounded w-1/3"></div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <IntegrationStatus stripe={data.stripe} businessId={bid} onDisconnect={() => setData(d => ({ ...d, stripe: { connected: false } }))} />
+      )}
 
       {/* Key Stats */}
-      <section>
-        <h2 className="text-sm font-medium text-[#a8a29e] mb-4">Key Metrics</h2>
-        {loading ? <StatsSkeleton /> : <StatsGrid metrics={data.metrics} />}
-      </section>
+      {loading ? <StatsSkeleton /> : <StatsGrid metrics={data.metrics} />}
 
       {/* Top Recommendations */}
-      <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-medium text-[#a8a29e]">Top Actions</h2>
-          {!loading && data.recommendations.length > 0 && (
-            <a href="/dashboard/recommendations" className="text-xs text-[#da7756] hover:text-[#c96b4d] transition-colors">
-              View all
-            </a>
-          )}
-        </div>
-        {loading ? <RecommendationsSkeleton /> : <TopRecommendations recommendations={data.recommendations} />}
-      </section>
+      {loading ? <RecommendationsSkeleton /> : <TopRecommendations recommendations={data.recommendations} />}
     </div>
   );
 }
