@@ -12,14 +12,14 @@ Vaultra is an AI financial agent that proactively monitors and optimizes your bu
 
 - **Proactive Optimization**: Continuously monitors your financial metrics and suggests improvements before you need funding
 - **Unified Funding Readiness Score**: Single 0–100 score that shows how attractive your business is to lenders
-- **Actionable Recommendations**: Daily, prioritized recommendations to improve your score (e.g., "Reduce chargebacks", "Stabilize revenue streams")
+- **Actionable Recommendations**: Daily, prioritized recommendations to improve your score (e.g., "Stabilize revenue streams", "Reduce refunds")
 - **AI Agent**: Natural language Q&A that explains your metrics, recommendations, and funding readiness factors
-- **Stripe Integration**: Connects to your Stripe account to analyze revenue, payouts, disputes, and chargebacks
+- **Intuit QuickBooks Integration**: Connects to your Intuit QuickBooks account to analyze P&L, revenue, invoices, and refunds
 
 ## How It Works
 
-1. **Connect Stripe**: Link your Stripe account (OAuth)
-2. **Automatic Analysis**: Vaultra ingests your financial data and computes metrics hourly
+1. **Connect Intuit QuickBooks**: Link your Intuit QuickBooks account (OAuth)
+2. **Automatic Analysis**: Vaultra ingests your financial data and computes metrics periodically
 3. **Score & Recommendations**: Get your funding readiness score and daily recommendations
 4. **Ask Questions**: Chat with the AI agent about your financial health and what to improve
 
@@ -29,7 +29,7 @@ Vaultra is an AI financial agent that proactively monitors and optimizes your bu
 - **Backend**: Python / FastAPI (modular monolith)
 - **AI Agent**: MCP (Model Context Protocol) + RAG with Pinecone
 - **Database**: PostgreSQL (Cloud SQL)
-- **Payments**: Stripe API (Connect Standard)
+- **Financials**: Intuit QuickBooks API (OAuth2)
 - **Infrastructure**: Docker, Kubernetes (GKE), Google Cloud
 
 ## License
