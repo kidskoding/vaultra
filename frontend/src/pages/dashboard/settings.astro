@@ -1,0 +1,14 @@
+---
+import DashboardLayout from '../../layouts/DashboardLayout.astro';
+import SettingsPage from '../../components/SettingsPage';
+---
+<DashboardLayout title="Settings">
+  <div class="space-y-6">
+    <div>
+      <h1 class="text-2xl font-semibold text-claude-text tracking-tight">Settings</h1>
+      <p class="text-sm text-claude-text-secondary mt-1">Manage your integrations and preferences.</p>
+    </div>
+
+    <SettingsPage client:load />
+  </div>
+</DashboardLayout>

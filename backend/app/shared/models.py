@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, DateTime, Integer, Numeric, Date, ForeignKey, Text, CheckConstraint, UniqueConstraint
+from sqlalchemy import Column, String, DateTime, Integer, Numeric, Date, ForeignKey, Text, CheckConstraint, UniqueConstraint, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.sql import func
 from app.shared.database import Base
@@ -88,7 +88,10 @@ class FinancialMetricSnapshot(Base):
     metrics_json = Column(JSONB)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    __table_args__ = (UniqueConstraint("business_id", "period_start", "period_end", name="uq_metrics_period"),)
+    __table_args__ = (
+        UniqueConstraint("business_id", "period_start", "period_end", name="uq_metrics_period"),
+        Index("ix_metric_snapshots_business_period_end", "business_id", "period_end"),
+    )
 
 
 class ReadinessScore(Base):
@@ -101,7 +104,10 @@ class ReadinessScore(Base):
     components = Column(JSONB)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-    __table_args__ = (CheckConstraint("score >= 0 AND score <= 100", name="ck_score_range"),)
+    __table_args__ = (
+        CheckConstraint("score >= 0 AND score <= 100", name="ck_score_range"),
+        Index("ix_readiness_scores_business_created", "business_id", "created_at"),
+    )
 
 
 class Recommendation(Base):
@@ -119,6 +125,8 @@ class Recommendation(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    __table_args__ = (Index("ix_recommendations_business_id", "business_id"),)
+
 
 class AgentConversation(Base):
     __tablename__ = "agent_conversations"
@@ -129,6 +137,8 @@ class AgentConversation(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
+    __table_args__ = (Index("ix_agent_conversations_business_id", "business_id"),)
+
 
 class AgentMessage(Base):
     __tablename__ = "agent_messages"
@@ -138,3 +148,5 @@ class AgentMessage(Base):
     role = Column(String(20), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+    __table_args__ = (Index("ix_agent_messages_conversation_id", "conversation_id"),)

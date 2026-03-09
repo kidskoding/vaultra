@@ -13,24 +13,7 @@ class StripeService:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def initiate_connect(self, business_id: UUID, user_id: UUID) -> str:
-        redirect_uri = f"http://localhost:8000/api/v1/integrations/stripe/callback"
-        url = (
-            f"https://connect.stripe.com/oauth/authorize"
-            f"?response_type=code"
-            f"&client_id={settings.STRIPE_CONNECT_CLIENT_ID}"
-            f"&scope=read_write"
-            f"&redirect_uri={redirect_uri}"
-            f"&state={business_id}"
-        )
-        return url
-
-    async def handle_connect_callback(self, code: str, business_id: UUID) -> IntegrationAccount:
-        try:
-            response = stripe_lib.OAuth.token(grant_type="authorization_code", code=code)
-        except stripe_lib.oauth_error.OAuthError as e:
-            raise HTTPException(status_code=400, detail={"error": {"code": "VALIDATION_ERROR", "message": str(e)}})
-        account_id = response["stripe_user_id"]
+    async def initiate_connect(self, business_id: UUID) -> str:
         result = await self.db.execute(
             select(IntegrationAccount).where(
                 IntegrationAccount.business_id == business_id,
@@ -38,17 +21,54 @@ class StripeService:
             )
         )
         integration = result.scalar_one_or_none()
-        if integration:
-            integration.external_id = account_id
-            integration.status = "active"
-        else:
+        if not integration:
+            account = stripe_lib.Account.create(type="standard")
             integration = IntegrationAccount(
                 business_id=business_id,
                 provider="stripe",
-                external_id=account_id,
-                status="active",
+                external_id=account["id"],
+                status="pending",
+                metadata_={
+                    "details_submitted": account.get("details_submitted"),
+                    "charges_enabled": account.get("charges_enabled"),
+                    "payouts_enabled": account.get("payouts_enabled"),
+                },
             )
             self.db.add(integration)
+            await self.db.commit()
+            await self.db.refresh(integration)
+
+        return_url = f"{settings.BACKEND_BASE_URL}/api/v1/integrations/stripe/return?business_id={business_id}"
+        refresh_url = f"{settings.FRONTEND_BASE_URL}/onboarding/stripe-connect?business_id={business_id}"
+        account_link = stripe_lib.AccountLink.create(
+            account=integration.external_id,
+            refresh_url=refresh_url,
+            return_url=return_url,
+            type="account_onboarding",
+        )
+        return account_link["url"]
+
+    async def handle_account_return(self, business_id: UUID) -> IntegrationAccount:
+        result = await self.db.execute(
+            select(IntegrationAccount).where(
+                IntegrationAccount.business_id == business_id,
+                IntegrationAccount.provider == "stripe",
+            )
+        )
+        integration = result.scalar_one_or_none()
+        if not integration:
+            raise HTTPException(status_code=404, detail={"error": {"code": "NOT_FOUND", "message": "Stripe integration not found"}})
+
+        account = stripe_lib.Account.retrieve(integration.external_id)
+        details_submitted = account.get("details_submitted")
+        charges_enabled = account.get("charges_enabled")
+        payouts_enabled = account.get("payouts_enabled")
+        integration.status = "active" if details_submitted else "pending"
+        integration.metadata_ = {
+            "details_submitted": details_submitted,
+            "charges_enabled": charges_enabled,
+            "payouts_enabled": payouts_enabled,
+        }
         await self.db.commit()
         await self.db.refresh(integration)
         return integration

@@ -158,18 +158,22 @@ function StatsGrid({ metrics }: { metrics: MetricsData | null }) {
 
 function IntegrationStatus({ stripe, businessId }: { stripe: StripeStatus | null; businessId: string }) {
   const connected = stripe?.connected ?? false;
+  const handleConnect = () => {
+    if (!businessId) return;
+    import('../lib/api')
+      .then(({ initiateStripeConnect }) => initiateStripeConnect(businessId))
+      .catch(() => {
+        // No-op: settings page shows errors; dashboard just tries to redirect.
+      });
+  };
 
   return (
-    <div className={`bg-[#292524] rounded-2xl border p-5 transition-colors animate-fade-in ${connected ? 'border-[#44403c] hover:border-[#da7756]/30' : 'border-amber-500/30'}`}>
+    <div className="bg-[#292524] rounded-2xl border border-[#635BFF] p-5 transition-colors animate-fade-in">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${connected ? 'bg-emerald-500/10' : 'bg-amber-500/10'}`}>
-            <svg className={`w-5 h-5 ${connected ? 'text-emerald-400' : 'text-amber-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {connected ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              )}
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#635BFF]">
+            <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z" />
             </svg>
           </div>
           <div>
@@ -178,12 +182,12 @@ function IntegrationStatus({ stripe, businessId }: { stripe: StripeStatus | null
           </div>
         </div>
         {!connected && (
-          <a
-            href={`/dashboard/settings?connect=stripe&business_id=${businessId}`}
+          <button
+            onClick={handleConnect}
             className="text-xs px-4 py-2 bg-[#da7756] text-white rounded-lg hover:bg-[#c96b4d] transition-colors"
           >
             Connect
-          </a>
+          </button>
         )}
       </div>
     </div>
@@ -267,7 +271,7 @@ export default function DashboardOverview() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-2">
       {/* Funding Readiness Score */}
       <section>
         {loading ? (

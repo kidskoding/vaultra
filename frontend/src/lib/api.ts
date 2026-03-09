@@ -2,9 +2,22 @@ import { getToken } from './auth';
 
 const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
+// TTL for GET response cache (5 minutes)
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+interface CacheEntry<T> {
+  data: T;
+  expiresAt: number;
+}
+
+const responseCache = new Map<string, CacheEntry<unknown>>();
 // Deduplicates concurrent GET requests to the same URL so multiple components
 // hitting the same endpoint (e.g. two MetricsCharts) share a single fetch.
 const inFlight = new Map<string, Promise<unknown>>();
+
+export function bustCache(endpoint: string) {
+  responseCache.delete(endpoint);
+}
 
 async function apiRequest<T = unknown>(endpoint: string, options?: RequestInit): Promise<T> {
   const token = getToken();
@@ -17,6 +30,15 @@ async function apiRequest<T = unknown>(endpoint: string, options?: RequestInit):
   const isGet = !options?.method || options.method.toUpperCase() === 'GET';
   const cacheKey = isGet ? endpoint : null;
 
+  // Return cached response if still fresh
+  if (cacheKey) {
+    const cached = responseCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiresAt) {
+      return cached.data as T;
+    }
+  }
+
+  // Deduplicate concurrent requests for the same key
   if (cacheKey && inFlight.has(cacheKey)) {
     return inFlight.get(cacheKey) as Promise<T>;
   }
@@ -29,6 +51,10 @@ async function apiRequest<T = unknown>(endpoint: string, options?: RequestInit):
       }
       if (response.status === 204) return null as T;
       return response.json() as Promise<T>;
+    })
+    .then((data) => {
+      if (cacheKey) responseCache.set(cacheKey, { data, expiresAt: Date.now() + CACHE_TTL_MS });
+      return data as T;
     })
     .finally(() => {
       if (cacheKey) inFlight.delete(cacheKey);

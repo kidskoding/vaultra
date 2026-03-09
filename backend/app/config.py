@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     STRIPE_SECRET_KEY: str = ""
     STRIPE_WEBHOOK_SECRET: str = ""
     STRIPE_CONNECT_CLIENT_ID: str = ""
+    FRONTEND_BASE_URL: str = "http://localhost:4321"
+    BACKEND_BASE_URL: str = "http://localhost:8000"
     PINECONE_API_KEY: str = ""
     PINECONE_INDEX: str = "vaultra-knowledge-dev"
     OPENAI_API_KEY: str = ""

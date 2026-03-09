@@ -1,10 +1,11 @@
 from uuid import UUID
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.shared.database import get_db
 from app.shared.deps import get_current_user
 from app.shared.models import User
+from app.config import settings
 from app.stripe.service import StripeService
 
 router = APIRouter(tags=["stripe"])
@@ -17,19 +18,23 @@ async def stripe_connect(
     db: AsyncSession = Depends(get_db),
 ):
     service = StripeService(db)
-    url = await service.initiate_connect(business_id, current_user.id)
+    url = await service.initiate_connect(business_id)
     return {"url": url}
 
 
+@router.get("/integrations/stripe/return")
 @router.get("/integrations/stripe/callback")
-async def stripe_callback(
-    code: str,
-    state: UUID,
+async def stripe_return(
+    business_id: UUID | None = None,
+    state: UUID | None = None,
     db: AsyncSession = Depends(get_db),
 ):
+    target_business_id = business_id or state
+    if not target_business_id:
+        raise HTTPException(status_code=400, detail={"error": {"code": "VALIDATION_ERROR", "message": "Missing business_id"}})
     service = StripeService(db)
-    await service.handle_connect_callback(code, state)
-    return RedirectResponse(f"http://localhost:4321/dashboard?business_id={state}")
+    await service.handle_account_return(target_business_id)
+    return RedirectResponse(f"{settings.FRONTEND_BASE_URL}/dashboard?business_id={target_business_id}")
 
 
 @router.get("/integrations/stripe/status")
